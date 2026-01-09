@@ -1,0 +1,32 @@
+name: Deploy PETSc MCP server
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image (and run Dockerfile build steps)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.petsc-mcp-servers
+          push: false
+          tags: petsc-mcp-servers:ci
+          build-args: |
+            PETSC_GIT_BRANCH=release
+            PETSC_DIR=./
+            PETSC_ARCH=arch-linux-x64-opt
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Smoke test container
+        run: docker run petsc-mcp-servers:ci python3 petsc_compile_run_mcp_server.py
