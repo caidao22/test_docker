@@ -20,6 +20,7 @@ jobs:
           context: .
           file: Dockerfile.petsc-mcp-servers
           push: false
+          load: true
           tags: petsc-mcp-servers:ci
           build-args: |
             PETSC_GIT_BRANCH=release
@@ -29,4 +30,4 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Smoke test container
-        run: docker run petsc-mcp-servers:ci python3 petsc_compile_run_mcp_server.py
+        run: docker run --rm petsc-mcp-servers:ci python3 petsc_compile_run_mcp_server.py

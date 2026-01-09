@@ -1,3 +1,14 @@
+FROM python:3.12-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    git \
+    make \
+    gcc \
+    g++ \
+    file \
+    && rm -rf /var/lib/apt/lists/*
+
 ARG PETSC_GIT_BRANCH=release
 ARG PETSC_DIR=./
 ARG PETSC_ARCH=arch-linux-x64-opt
@@ -11,13 +22,13 @@ RUN git clone --depth=1 --branch=$PETSC_GIT_BRANCH https://gitlab.com/petsc/pets
   python3 configure \
     --with-cxx-dialect=C++14 \
     --with-debugging=0 COPTFLAGS="$OPT" CXXOPTFLAGS="$OPT" FOPTFLAGS="$OPT" \
-    --download-mpich \
+    # --download-mpich \
+    --with-mpi=0 \
     --with-fc=0 \
     --download-f2cblaslapack \
     && \
   make
 
-RUN git clone https://gitlab.com/petsc/petsc_mcp_servers.git && \
-  cd petsc_mcp_servers && \
-  pip3 install fastmcp && \
-  python3 petsc_compile_run_mcp_server.py
+RUN git clone https://gitlab.com/petsc/petsc_mcp_servers.git 
+WORKDIR petsc_mcp_servers
+RUN pip3 install --no-cache-dir fastmcp
